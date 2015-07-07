@@ -1,0 +1,15 @@
+{
+  "name": "snowair/phpunithelper-thinkphp",
+  "description": "thinkPHP3.2单元测试辅助类",
+  "authors": [
+    {
+      "name": "zhuyajie",
+      "email": "xcoolcc@gmail.com"
+    }
+  ],
+  "autoload": {
+    "files":[
+      "PhpunitHelper.php"
+    ]
+  }
+}
