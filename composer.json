@@ -1,6 +1,6 @@
 {
   "name": "snowair/phpunithelper-thinkphp",
-  "description": "thinkPHP3.2单元测试辅助类",
+  "description": "ThinkPHP3.2单元测试辅助类",
   "authors": [
     {
       "name": "zhuyajie",
