@@ -25,7 +25,7 @@
 }
 ```
 
-关键在于： autoload和require-dev
+** 关键在于： autoload和require-dev **
 
 ```
 $ composer install --dev
@@ -60,12 +60,17 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 
     public function setUp()
     {
-        $this->api= new \Api\Controller\Api();
+        $this->api= new \Api\Controller\ApiController;
     }
     
+    /**
+     * 测试api的输出
+     */
     public function testIndex()
     {
-        $json = $this->api->index();
+        ob_start();
+        $this->api->test();
+        $json = ob_get_clean();
         $this->assertNotEmpty($json,'没有任何输出');
         $array = json_decode($json,true);
         $this->assertNotEmpty($array,'没有任何数据');

@@ -225,7 +225,7 @@ class PhpunitHelper {
      */
     public function start()
     {
-        spl_autoload_register('Bootstrap::autoload');
+        spl_autoload_register('\Think\PhpunitHelper::autoload');
 
         $mode   =   include is_file(CONF_PATH.'core.php')?CONF_PATH.'core.php':MODE_PATH.APP_MODE.'.php';
         // 加载核心文件
