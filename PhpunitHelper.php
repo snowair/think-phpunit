@@ -55,18 +55,16 @@ class PhpunitHelper {
      * @param        $http_host
      * @param        $module_name
      * @param        $controller_name
-     * @param        $action_name
      * @param string $request_scheme
      * @param string $server_port
      */
-    public function setMVC($http_host,$module_name,$controller_name,$action_name,$request_scheme='http',$server_port='80')
+    public function setMVC($http_host,$module_name,$controller_name,$request_scheme='http',$server_port='80')
     {
         $this->setServerEnv('HTTP_HOST',$http_host);
         $this->setServerEnv('REQUEST_SCHEME',$request_scheme);
         $this->setServerEnv('SERVER_PORT',$server_port);
         defined('MODULE_NAME') or define('MODULE_NAME', $module_name );
         defined('CONTROLLER_NAME') or define('CONTROLLER_NAME', $controller_name);
-        defined('ACTION_NAME') or define('ACTION_NAME',$action_name);
     }
 
     /**

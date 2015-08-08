@@ -35,7 +35,7 @@ $ composer install --dev
 
 测试文件组织比较自由，我把测试文件放在了项目根目录下的 test 文件夹
 
-下面是一个简单的示例测试文件 ApiTest.php
+下面是一个简单的测试控制器方法输出的示例测试文件 ApiTest.php
 
 ```
 <?php
@@ -49,7 +49,7 @@ class ApiTest extends PHPUnit_Framework_TestCase {
         // 创建测试辅助实例
         self::$app = new \Think\PhpunitHelper($base_path.'Application/',$base_path.'ThinkPHP/',$base_path.'Runtime-test');
         // 模拟app
-        self::$app->setMVC('test.com','Api','Pay','index');  
+        self::$app->setMVC('test.com','Api','Pay');
         // 设置测试环境使用的配置
         self::$app->setTestConfig(['DB_NAME'=>'test_poscard',
                                    'DB_HOST'=>'127.0.0.1',
@@ -64,20 +64,41 @@ class ApiTest extends PHPUnit_Framework_TestCase {
     }
     
     /**
-     * 测试api的输出
+     * 测试字符串的输出
      */
-    public function testIndex()
+    public function testOutput()
     {
-        ob_start();
-        $this->api->test();
-        $json = ob_get_clean();
-        $this->assertNotEmpty($json,'没有任何输出');
-        $array = json_decode($json,true);
-        $this->assertNotEmpty($array,'没有任何数据');
-        $this->assertTrue( isset($array['errcode']) , '没有errcode' );
-        $this->assertTrue( isset($array['errmsg']) , '没有errmsg' );
-        $this->assertEquals('0',$array['errcode'],'出错了：'.$array['errmsg']);
+        self::$app->defineConst('ACTION_NAME','output'); // 测试方法里先定义一些你的action方法里用到的常量
+        $this->expectOutputString('123');
+        $this->api->output();
+    }
+    
+    /**
+     * 测试json字符串的输出
+     */
+    public function testJsonOutput()
+    {
+        $that=$this;
+        $this->setOutputCallback(function($out) use($that){
+            $out = json_decode($out,true);
+            $that->assertInternalType('array',$out);
+            $that->assertArrayHasKey('status',$out);
+            $that->assertEquals('0',$out['status']);
+        });
+        $this->api->jsonOutput();
     }
 }
 ```
+
+### 特别说明
+
+1. 由于 控制器的 error 方法和 ajaxReturn 方法中含有 exit, 而 exit 会中断一切执行, 所以phpunit无法测试使用了这两个方法(以及其他所有含有exit)的方法
+    * 你需要调整代码, 去除代码中的exit, 否则无法测试它们.
+
+2. 由于 phpunit 在启动后就已经产生了自己的输出, 所以被测的方法中不能直接使用 `header()` 函数, 否则会抛出错误. 所以代码中使用了header函数的地方需要调整,有以下两种方式调整:
+    ```
+    @header(''); // 强制屏蔽错误
+    headers_sent() or header(''); // 发送前判断是否已经产生过输出
+    ```
+    * 对于ThinkPHP来说, 只需要修改ajaxReturn方法
 
