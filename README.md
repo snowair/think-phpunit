@@ -19,8 +19,7 @@
     "classmap": ["Application","ThinkPHP/Library"]
   },
   "require-dev": {
-    "phpunit/phpunit": "^4.7",
-    "snowair/phpunithelper-thinkphp": "dev-master"
+    "snowair/think-phpunit": "dev-master"
   }
 }
 ```
