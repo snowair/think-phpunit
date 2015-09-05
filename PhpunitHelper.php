@@ -16,6 +16,7 @@ class PhpunitHelper {
      */
     protected $model;
     protected $testConfig=[];
+    protected $action_name;
 
     /**
      * @param string $app_path
@@ -232,7 +233,9 @@ class PhpunitHelper {
                 include_once $file;
             }
         }
-
+        C('HTML_CACHE_ON',false);
+        C('LIMIT_ROBOT_VISIT',false) ;
+        C('LIMIT_PROXY_VISIT',false);
         // 加载应用模式配置文件
         foreach ($mode['config'] as $key=>$file){
             is_numeric($key)?C(load_config($file)):C($key,load_config($file));
@@ -353,8 +356,19 @@ class PhpunitHelper {
         return ;
     }
 
+    /**
+     * 设定控制器名称
+     * @param $action
+     */
+    public function setActionName($action)
+    {
+        $this->action_name = $action;
+    }
+
     protected function dispatch()
     {
+        $urlCase        =   C('URL_CASE_INSENSITIVE');
+
         // 定义当前模块路径
         define('MODULE_PATH', APP_PATH.MODULE_NAME.'/');
         // 定义当前模块的模版缓存路径
@@ -395,6 +409,13 @@ class PhpunitHelper {
             // 当前应用地址
             define('__APP__',strip_tags(PHP_FILE));
         }
+
+        $moduleName    =   MODULE_NAME;
+        $controllerName =   CONTROLLER_NAME;
+        define('__MODULE__',(defined('BIND_MODULE') || !C('MULTI_MODULE'))? __APP__ : __APP__.'/'.($urlCase ? strtolower($moduleName) : $moduleName));
+        define('__CONTROLLER__',__MODULE__.$depr.(defined('BIND_CONTROLLER')? '': ( $urlCase ? parse_name($controllerName) : $controllerName )) );
+        define('__ACTION__',__CONTROLLER__.$depr.$this->action_name);
+        defined('__SELF__') || define('__SELF__',strip_tags(isset($_SERVER[C('URL_REQUEST_URI')])?$_SERVER[C('URL_REQUEST_URI')]:''));
     }
 
     /**

@@ -24,7 +24,7 @@
 }
 ```
 
-** 关键在于： autoload和require-dev **
+**关键在于：autoload和require-dev**
 
 ```
 $ composer install --dev
@@ -74,7 +74,7 @@ class ApiTest extends PHPUnit_Framework_TestCase {
      */
     public function testOutput()
     {
-        self::$app->defineConst('ACTION_NAME','output'); // 测试方法里先定义一些你的action方法里用到的常量
+        self::$app->setActionName('output');
         $this->expectOutputString('123');
         $this->api->output();
     }
