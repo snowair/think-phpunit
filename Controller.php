@@ -106,4 +106,8 @@ trait Controller
         }
     }
 
+    protected function error($message='',$jumpUrl='',$ajax=false) {
+        $this->dispatchJump($message,0,$jumpUrl,$ajax);
+    }
+
 }
