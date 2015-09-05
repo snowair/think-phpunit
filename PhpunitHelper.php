@@ -232,10 +232,20 @@ class PhpunitHelper {
         // 加载核心文件
         foreach ($mode['core'] as $file){
             if(is_file($file)) {
-                include_once $file;
+                if ( strpos( $file, 'Think/Controller.class.php' )!==false
+                    ||strpos( $file, 'Think\\Controller.class.php' )!==false
+                    ||strpos( $file, 'Think/View.class.php' )!==false
+                    ||strpos( $file, 'Think\\View.class.php' )!==false
+                ) {
+                    // not include
+                }else{
+                    include_once $file;
+                }
             }
         }
-
+        C('HTML_CACHE_ON',false);
+        C('LIMIT_ROBOT_VISIT',false) ;
+        C('LIMIT_PROXY_VISIT',false);
         // 加载应用模式配置文件
         foreach ($mode['config'] as $key=>$file){
             is_numeric($key)?C(load_config($file)):C($key,load_config($file));
@@ -347,11 +357,11 @@ class PhpunitHelper {
         // TMPL_EXCEPTION_FILE 改为绝对地址
         C('TMPL_EXCEPTION_FILE',realpath(C('TMPL_EXCEPTION_FILE')));
         defined('IS_AJAX') or define(
-        'IS_AJAX',
-        ( (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
-            || !empty($_POST[C('VAR_AJAX_SUBMIT')])
-            || !empty($_GET[C('VAR_AJAX_SUBMIT')])
-        ) ? true : false
+            'IS_AJAX',
+            ( (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
+                || !empty($_POST[C('VAR_AJAX_SUBMIT')])
+                || !empty($_GET[C('VAR_AJAX_SUBMIT')])
+            ) ? true : false
         );
         return ;
     }

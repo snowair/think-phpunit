@@ -1,6 +1,6 @@
 {
-  "name": "snowair/think-phpunit",
-  "description": "ThinkPHP3.2集成phpunit",
+  "name": "snowair/phpunithelper-thinkphp",
+  "description": "ThinkPHP3.2单元测试辅助类",
   "authors": [
     {
       "name": "zhuyajie",
@@ -9,10 +9,11 @@
   ],
   "autoload": {
     "files":[
-      "PhpunitHelper.php"
+      "PhpunitHelper.php",
+      "Controller.php",
+      "Response.php",
+      "View.class.php",
+      "Think.class.php"
     ]
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^4.7"
   }
 }

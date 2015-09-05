@@ -14,7 +14,7 @@
 
 ```
 {
-  "name": "snowair/service",
+  "name": "公司名/项目名",
   "autoload": {
     "classmap": ["Application","ThinkPHP/Library"]
   },
@@ -24,10 +24,16 @@
 }
 ```
 
-** 关键在于： autoload和require-dev **
+**关键在于： autoload和require-dev**
 
 ```
 $ composer install --dev
+```
+
+然后**很重要的一项修改**: 删除 `ThinkPHP/ThinkPHP.php` 第 95 行:
+
+```
+require CORE_PATH.'Think'.EXT;
 ```
 
 ### 创建单元测试文件
@@ -89,25 +95,29 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 }
 ```
 
+## 关于 header 函数
+
+由于 phpunit 在启动后就已经产生了自己的输出, 所以被测的方法中不能直接使用 `header()` 函数, 否则会抛出错误. 
+
+所以代码中使用了header函数的地方需要调整,有以下两种方式调整:
+
+```
+headers_sent() or header(''); // 推荐: 发送前判断是否已经产生过输出
+@header(''); // 强制屏蔽错误
+```
+
 ## 关于exit
 
-1. 由于 控制器的 dispatchJump 方法和 ajaxReturn 方法中含有 exit, 而 exit 会中断一切执行, 所以phpunit无法测试使用了这两个方法(error方法,以及其他所有含有exit)的方法
-    * 你需要调整代码, 去除代码中的exit, 否则无法测试它们.
-
-2. 由于 phpunit 在启动后就已经产生了自己的输出, 所以被测的方法中不能直接使用 `header()` 函数, 否则会抛出错误. 所以代码中使用了header函数的地方需要调整,有以下两种方式调整:
-    ```
-    @header(''); // 强制屏蔽错误
-    headers_sent() or header(''); // 发送前判断是否已经产生过输出
-    ```
-    * 对于ThinkPHP来说, 只需要修改ajaxReturn方法
-
-### 测试含有exit的方法
-
+由于exit 会中断一切执行, 所以 phpunit 无法测试使用了exit语句的方法 . 
+ 
 如果你的方法中直接或间接用到了exit, 最佳的办法就是重构去除exit, 让程序能正常终结, 而不要强制终结.
 
-对于测试使用了 ajaxReturn/error方法的控制器action, think-phpunit 提供了一种可选的方案:
+### ajaxReturn/error方法
 
-为需要测试的控制器类 use 这个trait(需php5.4以上版本) :`\Snowair\Think\Controller`, 例如:
+由于thinkphp的控制器的ajaxReturn方法和error方法使用了exit. 
+
+所以对于测试使用了 ajaxReturn/error方法的控制器action, think-phpunit 提供了一种应对方案:
+
 
 ```
 <?php
@@ -117,13 +127,10 @@ use Think\Controller;
 
 class TestController extends Controller
 {
-    use \Snowair\Think\Controller;
-    
     public function t()
     {
         $this->ajaxReturn(['data'=>123]);
     }
-
 }
 ```
 
@@ -139,7 +146,7 @@ class TestControllerTest extends \PHPUnit_Framework_TestCase{
         $base_path = __DIR__.'/../';
         self::$app = new \Think\PhpunitHelper($base_path.'Application/',$base_path.'ThinkPHP/',$base_path.'Runtime-test');
         self::$app->setMVC('domain.com','Api','Test');
-        self::$app->setTestConfig(['DB_NAME'=>'test', 'DB_HOST'=>'127.0.0.1', ]);
+        self::$app->setTestConfig(['DB_NAME'=>'test', 'DB_HOST'=>'127.0.0.1']);
         self::$app->start();
     }
     
@@ -150,6 +157,7 @@ class TestControllerTest extends \PHPUnit_Framework_TestCase{
             self::$app->setActionName('t');
             $controller->t();
         }catch ( \Snowair\Think\Phpunit\Response $e){
+            // Response异常对象保存了ajaxReturn/error的输出, 你只需要捕捉这个异常取出message.
             $this->assertEquals('{"data":123}',$e->getMessage());
         }
     }
