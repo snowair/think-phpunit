@@ -268,7 +268,7 @@ class PhpunitHelper {
         L(include THINK_PATH.'Lang/'.strtolower(C('DEFAULT_LANG')).'.php');
         // 调试模式加载系统默认的配置文件
         C(include THINK_PATH.'Conf/debug.php');
-            // 读取应用调试配置文件
+        // 读取应用调试配置文件
         if(is_file(CONF_PATH.'debug'.CONF_EXT)){
             C(include CONF_PATH.'debug'.CONF_EXT);
         }
@@ -290,7 +290,7 @@ class PhpunitHelper {
             C(load_config(CONF_PATH.'test'.CONF_EXT));
         }
         // 加载.test.env文件定义的单元测试配置
-        if (class_exists('\\josegonzalez\\Dotenv\\Loader')) {
+        if (class_exists('\\Snowair\\Dotenv\\Loader')) {
             $this->loadEnvConfig();
 
         }
@@ -344,11 +344,11 @@ class PhpunitHelper {
         // TMPL_EXCEPTION_FILE 改为绝对地址
         C('TMPL_EXCEPTION_FILE',realpath(C('TMPL_EXCEPTION_FILE')));
         defined('IS_AJAX') or define(
-            'IS_AJAX',
-            ( (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
-                || !empty($_POST[C('VAR_AJAX_SUBMIT')])
-                || !empty($_GET[C('VAR_AJAX_SUBMIT')])
-            ) ? true : false
+        'IS_AJAX',
+        ( (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
+            || !empty($_POST[C('VAR_AJAX_SUBMIT')])
+            || !empty($_GET[C('VAR_AJAX_SUBMIT')])
+        ) ? true : false
         );
         return ;
     }
@@ -437,6 +437,7 @@ class PhpunitHelper {
      */
     public function setTestConfig(array $config )
     {
+        $config['phpunit']=true;
         $this->testConfig = $config;
     }
 
@@ -448,29 +449,27 @@ class PhpunitHelper {
         $path =  dirname(APP_PATH);
         $env_file = $path.'/.test.env';
         if (file_exists($env_file)) {
-            $Loader = new josegonzalez\Dotenv\Loader($env_file);
-            $env = $Loader->parse()->toArray();
-            if (!empty($env['EXT_ENV'])) {
-                $exts = explode(',',$env['EXT_ENV']);
-                foreach ($exts as $value) {
-                    $ext_file= $path.'/.'.$value ;
-                    if (file_exists( $ext_file ) ){
-                        $Loader->setFilepath($ext_file);
-                        $ext = $Loader->parse()->toArray();
-                        if (!empty($ext['KEY'])) {
-                            $key = strtoupper($ext['KEY']);
-                            unset($ext['KEY']);
-                        }else{
-                            $key = strtoupper($value);
-                        }
-                        $env[$key] = $ext;
-                    }
-                }
-                unset($env['EXT_ENV']);
+            $Loader = new \Snowair\Dotenv\Loader($env_file);
+            $Loader->setFilters(['Snowair\Dotenv\DotArrayFilter'])
+                ->parse()
+                ->filter();
+            if( $expect=C('DOTENV.expect') ){
+                call_user_func_array(array($Loader,'expect'),explode(',',$expect));
             }
+            if(C('DOTENV.toConst')){
+                $Loader->define();
+            }
+            if(C('DOTENV.toServer')){
+                $Loader->toServer(true);
+            }
+            if(C('DOTENV.toEnv')){
+                $Loader->toEnv(true);
+            }
+            $env = $Loader->toArray();
             C($env);
         };
     }
 }
+
 
 
