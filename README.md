@@ -30,6 +30,13 @@
 $ composer install --dev
 ```
 
+然后**很重要的一项修改**: 注释掉 `ThinkPHP/ThinkPHP.php` 第 95 行,以供think-phpunit管理核心类的自动载入:
+
+```
+// require CORE_PATH.'Think'.EXT;
+```
+
+
 ### 创建单元测试文件
 
 测试文件组织比较自由，我把测试文件放在了项目根目录下的 test 文件夹
