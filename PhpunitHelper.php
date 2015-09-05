@@ -16,6 +16,7 @@ class PhpunitHelper {
      */
     protected $model;
     protected $testConfig=[];
+    protected $action_name;
 
     /**
      * @param string $app_path
@@ -41,6 +42,7 @@ class PhpunitHelper {
             throw new \RuntimeException($runtime_path.'不可写');
         }
 
+        define ( 'APP_DEBUG', true );
         define ( 'APP_PATH', $app_path );
         define ( 'RUNTIME_PATH', $runtime_path );
         define ( 'THINK_PATH',$think_path);
@@ -223,7 +225,8 @@ class PhpunitHelper {
      */
     public function start()
     {
-        spl_autoload_register('\Think\PhpunitHelper::autoload');
+        spl_autoload_register('\\Think\\PhpunitHelper::autoload');
+        Storage::connect(STORAGE_TYPE);
 
         $mode   =   include is_file(CONF_PATH.'core.php')?CONF_PATH.'core.php':MODE_PATH.APP_MODE.'.php';
         // 加载核心文件
@@ -268,7 +271,7 @@ class PhpunitHelper {
         L(include THINK_PATH.'Lang/'.strtolower(C('DEFAULT_LANG')).'.php');
         // 调试模式加载系统默认的配置文件
         C(include THINK_PATH.'Conf/debug.php');
-            // 读取应用调试配置文件
+        // 读取应用调试配置文件
         if(is_file(CONF_PATH.'debug'.CONF_EXT)){
             C(include CONF_PATH.'debug'.CONF_EXT);
         }
@@ -344,17 +347,28 @@ class PhpunitHelper {
         // TMPL_EXCEPTION_FILE 改为绝对地址
         C('TMPL_EXCEPTION_FILE',realpath(C('TMPL_EXCEPTION_FILE')));
         defined('IS_AJAX') or define(
-            'IS_AJAX',
-            ( (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
-                || !empty($_POST[C('VAR_AJAX_SUBMIT')])
-                || !empty($_GET[C('VAR_AJAX_SUBMIT')])
-            ) ? true : false
+        'IS_AJAX',
+        ( (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')
+            || !empty($_POST[C('VAR_AJAX_SUBMIT')])
+            || !empty($_GET[C('VAR_AJAX_SUBMIT')])
+        ) ? true : false
         );
         return ;
     }
 
+    /**
+     * 设定控制器名称
+     * @param $action
+     */
+    public function setActionName($action)
+    {
+        $this->action_name = $action;
+    }
+
     protected function dispatch()
     {
+        $urlCase        =   C('URL_CASE_INSENSITIVE');
+
         // 定义当前模块路径
         define('MODULE_PATH', APP_PATH.MODULE_NAME.'/');
         // 定义当前模块的模版缓存路径
@@ -395,6 +409,13 @@ class PhpunitHelper {
             // 当前应用地址
             define('__APP__',strip_tags(PHP_FILE));
         }
+
+        $moduleName    =   MODULE_NAME;
+        $controllerName =   CONTROLLER_NAME;
+        define('__MODULE__',(defined('BIND_MODULE') || !C('MULTI_MODULE'))? __APP__ : __APP__.'/'.($urlCase ? strtolower($moduleName) : $moduleName));
+        define('__CONTROLLER__',__MODULE__.$depr.(defined('BIND_CONTROLLER')? '': ( $urlCase ? parse_name($controllerName) : $controllerName )) );
+        define('__ACTION__',__CONTROLLER__.$depr.$this->action_name);
+        defined('__SELF__') || define('__SELF__',strip_tags(isset($_SERVER[C('URL_REQUEST_URI')])?$_SERVER[C('URL_REQUEST_URI')]:''));
     }
 
     /**
@@ -437,6 +458,7 @@ class PhpunitHelper {
      */
     public function setTestConfig(array $config )
     {
+        $config['phpunit']=true;
         $this->testConfig = $config;
     }
 

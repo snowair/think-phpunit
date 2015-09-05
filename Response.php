@@ -6,7 +6,7 @@
  */
 namespace Snowair\Think\Phpunit;
 
-class Response
+class Response extends \Exception
 {
 
 }

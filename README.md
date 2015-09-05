@@ -89,7 +89,7 @@ class ApiTest extends PHPUnit_Framework_TestCase {
 }
 ```
 
-### 特别说明
+## 关于exit
 
 1. 由于 控制器的 dispatchJump 方法和 ajaxReturn 方法中含有 exit, 而 exit 会中断一切执行, 所以phpunit无法测试使用了这两个方法(error方法,以及其他所有含有exit)的方法
     * 你需要调整代码, 去除代码中的exit, 否则无法测试它们.
@@ -101,3 +101,57 @@ class ApiTest extends PHPUnit_Framework_TestCase {
     ```
     * 对于ThinkPHP来说, 只需要修改ajaxReturn方法
 
+### 测试含有exit的方法
+
+如果你的方法中直接或间接用到了exit, 最佳的办法就是重构去除exit, 让程序能正常终结, 而不要强制终结.
+
+对于测试使用了 ajaxReturn/error方法的控制器action, think-phpunit 提供了一种可选的方案:
+
+为需要测试的控制器类 use 这个trait(需php5.4以上版本) :`\Snowair\Think\Controller`, 例如:
+
+```
+<?php
+namespace Api\Controller;
+
+use Think\Controller;
+
+class TestController extends Controller
+{
+    use \Snowair\Think\Controller;
+    
+    public function t()
+    {
+        $this->ajaxReturn(['data'=>123]);
+    }
+
+}
+```
+
+单元测试方法这样写:
+
+```
+class TestControllerTest extends \PHPUnit_Framework_TestCase{
+
+    static protected $app;
+
+    static public function setupBeforeClass()
+    {
+        $base_path = __DIR__.'/../';
+        self::$app = new \Think\PhpunitHelper($base_path.'Application/',$base_path.'ThinkPHP/',$base_path.'Runtime-test');
+        self::$app->setMVC('domain.com','Api','Test');
+        self::$app->setTestConfig(['DB_NAME'=>'test', 'DB_HOST'=>'127.0.0.1', ]);
+        self::$app->start();
+    }
+    
+    public function testT()
+    {
+        $controller = new \Api\Controller\TestController();
+        try{
+            self::$app->setActionName('t');
+            $controller->t();
+        }catch ( \Snowair\Think\Phpunit\Response $e){
+            $this->assertEquals('{"data":123}',$e->getMessage());
+        }
+    }
+}
+```
