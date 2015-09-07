@@ -9,6 +9,10 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 namespace Think;
+
+if (php_sapi_name()!='cli') {
+    return;
+}
 /**
  * ThinkPHP 视图类
  */

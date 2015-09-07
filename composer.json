@@ -8,10 +8,11 @@
     }
   ],
   "autoload": {
-    "psr-4": {"Think\\":"Think"},
     "files":[
       "PhpunitHelper.php",
-      "Response.php"
+      "Response.php",
+      "View.class.php",
+      "Controller.php"
     ]
   }
 }

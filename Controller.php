@@ -12,6 +12,10 @@ namespace Think;
 
 use Snowair\Think\Phpunit\Response;
 
+if (php_sapi_name()!='cli') {
+    return;
+}
+
 /**
  * ThinkPHP 控制器基类 抽象类
  */

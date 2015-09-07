@@ -46,8 +46,11 @@ class PhpunitHelper {
         define ( 'APP_PATH', $app_path );
         define ( 'RUNTIME_PATH', $runtime_path );
         define ( 'THINK_PATH',$think_path);
-
         $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REMOTE_ADDR']='127.0.0.1';
+        $_SERVER['REMOTE_PORT']='32800';
+        $_SERVER['SERVER_ADDR']='127.0.0.1';
+        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 
         $this->_defineConsts();
     }
@@ -62,6 +65,7 @@ class PhpunitHelper {
      */
     public function setMVC($http_host,$module_name,$controller_name,$request_scheme='http',$server_port='80')
     {
+        $this->setServerEnv('SERVER_NAME',$http_host);
         $this->setServerEnv('HTTP_HOST',$http_host);
         $this->setServerEnv('REQUEST_SCHEME',$request_scheme);
         $this->setServerEnv('SERVER_PORT',$server_port);
