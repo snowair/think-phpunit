@@ -11,8 +11,7 @@
     "files":[
       "PhpunitHelper.php",
       "Response.php",
-      "View.class.php",
-      "Controller.php"
+      "include.php"
     ]
   }
 }
