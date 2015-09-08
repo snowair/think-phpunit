@@ -13,5 +13,8 @@
       "Response.php",
       "include.php"
     ]
+  },
+  "require": {
+    "phpunit/phpunit": "^4.7"
   }
 }
