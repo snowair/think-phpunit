@@ -27,13 +27,7 @@
 **关键在于： autoload和require-dev**
 
 ```
-$ composer install --dev
-```
-
-然后**很重要的一项修改**: 删除 `ThinkPHP/ThinkPHP.php` 第 95 行:
-
-```
-require CORE_PATH.'Think'.EXT;
+$ composer install
 ```
 
 ### 创建单元测试文件

@@ -14,6 +14,9 @@ namespace Think;
  * ThinkPHP 视图类
  */
 class View {
+
+    static public $action_name = 'index';
+
     /**
      * 模板输出变量
      * @var tVar
@@ -158,7 +161,7 @@ class View {
         // 分析模板文件规则
         if('' == $template) {
             // 如果模板文件名为空 按照默认规则定位
-            $template = CONTROLLER_NAME . $depr . ACTION_NAME;
+            $template = CONTROLLER_NAME . $depr . self::$action_name;
         }elseif(false === strpos($template, $depr)){
             $template = CONTROLLER_NAME . $depr . $template;
         }

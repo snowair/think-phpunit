@@ -51,6 +51,7 @@ class PhpunitHelper {
         $_SERVER['REMOTE_PORT']='32800';
         $_SERVER['SERVER_ADDR']='127.0.0.1';
         $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $_SERVER['HTTP_REFERER']='/';
 
         $this->_defineConsts();
     }
@@ -172,7 +173,7 @@ class PhpunitHelper {
         // 系统常量定义
         defined('APP_PATH')     or define('APP_PATH',       dirname($_SERVER['SCRIPT_FILENAME']).'/');
         defined('APP_STATUS')   or define('APP_STATUS',     ''); // 应用状态 加载对应的配置文件
-        defined('APP_DEBUG')    or define('APP_DEBUG',      false); // 是否调试模式
+        defined('APP_DEBUG')    or define('APP_DEBUG',      true); // 是否调试模式
 
         defined('RUNTIME_PATH') or define('RUNTIME_PATH',   APP_PATH.'Runtime/');   // 系统运行时目录
         defined('LIB_PATH')     or define('LIB_PATH',       realpath(THINK_PATH.'Library').'/'); // 系统核心类库目录
@@ -247,9 +248,6 @@ class PhpunitHelper {
                 }
             }
         }
-        C('HTML_CACHE_ON',false);
-        C('LIMIT_ROBOT_VISIT',false) ;
-        C('LIMIT_PROXY_VISIT',false);
         // 加载应用模式配置文件
         foreach ($mode['config'] as $key=>$file){
             is_numeric($key)?C(load_config($file)):C($key,load_config($file));
@@ -289,6 +287,9 @@ class PhpunitHelper {
         if(is_file(CONF_PATH.'debug'.CONF_EXT)){
             C(include CONF_PATH.'debug'.CONF_EXT);
         }
+        C('HTML_CACHE_ON',false);
+        C('LIMIT_ROBOT_VISIT',false) ;
+        C('LIMIT_PROXY_VISIT',false);
         $this->run();
     }
 
@@ -301,6 +302,7 @@ class PhpunitHelper {
 
         $db_name = C('DB_NAME'); // 应用使用的数据库名
 
+        C('SHOW_PAGE_TRACE',false);
 
         // 加载项目中定义的单元测试配置文件
         if (is_file(CONF_PATH.'test'.CONF_EXT)) {
@@ -376,6 +378,7 @@ class PhpunitHelper {
      */
     public function setActionName($action)
     {
+        View::$action_name = $action;
         $this->action_name = $action;
     }
 
