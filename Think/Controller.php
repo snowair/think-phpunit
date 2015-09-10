@@ -297,19 +297,18 @@ abstract class Controller {
             if(!isset($this->jumpUrl)) $this->assign("jumpUrl",$_SERVER["HTTP_REFERER"]);
             $this->display(C('TMPL_ACTION_SUCCESS'));
         }else{
-            ob_start();
             $this->assign('error',$message);// 提示信息
             //发生错误时候默认停留3秒
             if(!isset($this->waitSecond))    $this->assign('waitSecond','3');
             // 默认发生错误的话自动返回上页
             if(!isset($this->jumpUrl)) $this->assign('jumpUrl',"javascript:history.back(-1);");
-            $this->display(C('TMPL_ACTION_ERROR'));
             // 中止执行  避免出错后继续执行
-            $response= ob_get_clean();
             if (C('phpunit')) {
+                $response = $this->fetch(C('TMPL_ACTION_ERROR'));
                 throw new Response($response);
             }else{
-                exit($response);
+                $this->display(C('TMPL_ACTION_ERROR'));
+                exit;
             }
         }
     }

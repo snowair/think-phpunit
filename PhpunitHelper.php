@@ -23,8 +23,20 @@ class PhpunitHelper {
      * @param string $think_path
      * @param string $runtime_path 不要与正式的runtime目录相同
      */
-    public function __construct($app_path, $think_path, $runtime_path)
+    public function __construct($app_path=null, $think_path=null, $runtime_path=null)
     {
+        $const = $this->guessPath();
+        extract($const);
+        if ($app_path===null) {
+            $app_path = $const['APP_PATH'];
+        }
+        if ($think_path===null) {
+            $think_path = $const['THINK_PATH'];
+        }
+        if ($runtime_path===null) {
+            $runtime_path = $const['ROOT_PATH'].'/Runtiime-test';
+        }
+
         if (!file_exists( $app_path )) {
             throw new \RuntimeException($app_path.'不存在');
         }
@@ -54,6 +66,45 @@ class PhpunitHelper {
         $_SERVER['HTTP_REFERER']='/';
 
         $this->_defineConsts();
+    }
+
+    public function guessPath()
+    {
+        defined('DS') || define('DS',DIRECTORY_SEPARATOR);
+        $vendorPath   = dirname(dirname(__DIR__));
+        $vendorParent = realpath(dirname($vendorPath));
+        $rootPath = $this->getProjectRoot($vendorParent);
+        $const = array();
+        if ($rootPath) {
+            $dir = dir($rootPath);
+            $index = $basepath = false;
+            while($d=$dir->read()){
+                if($d=='index.php'){
+                    $basepath = $rootPath;
+                    $index = $rootPath.DS.'index.php';
+                    break;
+                }
+                if(file_exists($rootPath.DS.$d.DS.'index.php') ){
+                    $basepath = $rootPath.DS.$d;
+                    $index = $rootPath.DS.$d.DS.'index.php';
+                    break;
+                }
+            }
+            if ($index && $basepath) {
+                $content = file_get_contents($index);
+                if (preg_match_all('/define.*[\'"](\w+)[\'"].*((?<=[\'"]).+(?=[\'"])|true|false)/im',$content,$matches,PREG_SET_ORDER)) {
+                    foreach ($matches as $value) {
+                        $const[$value[1]]=$value[2];
+                    }
+                    if ( preg_match( '{.*[\'"](.*ThinkPHP.php)[\'"]}',$content,$matches ) ) {
+                        $think_path = dirname(realpath($basepath.DS.$matches[1]));
+                        $const['THINK_PATH'] = $think_path;
+                    }
+                }
+            }
+            $const['ROOT_PATH'] = $rootPath;
+        }
+        return $const;
     }
 
     /**
@@ -328,8 +379,13 @@ class PhpunitHelper {
 
         // 记录应用初始化时间
         G('initTime');
-        // 应用结束标签
-        \Think\Hook::listen('app_end');
+        $controller ="\\".MODULE_NAME."\\Controller\\".CONTROLLER_NAME.C("DEFAULT_C_LAYER");
+        if (class_exists( $controller )) {
+            try{
+                PhpUnit::setController( new $controller );
+            }catch(\Exception $e ){
+            }
+        }
     }
 
     protected function init()
@@ -523,6 +579,20 @@ class PhpunitHelper {
             C($env);
         };
     }
-}
 
+    function getProjectRoot($vendorParent){
+        $dir = dirname($vendorParent);
+        if ( file_exists($vendorParent. DS .'composer.json')
+            || file_exists( $vendorParent.DS.'.git')
+            || file_exists( $vendorParent.DS.'index.php' )
+        )
+        {
+            return $vendorParent;
+        }elseif( $dir!=$vendorParent && $dir!='.' ){
+            return $this->getProjectRoot($dir);
+        }else{
+            return false;
+        }
+    }
+}
 
