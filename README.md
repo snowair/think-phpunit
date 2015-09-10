@@ -56,7 +56,7 @@ class IndexControllerTest extends PhpUnit
     {
         // 下面四行代码模拟出一个应用实例, 每一行都很关键, 需正确设置参数
         parent::$app = new \Think\PhpunitHelper();
-        parent::$app->setMVC('gansubang.com','Home','Index');
+        parent::$app->setMVC('domain.com','Home','Index');
         parent::$app->setTestConfig(['DB_NAME'=>'test', 'DB_HOST'=>'127.0.0.1',]); // 一定要设置一个测试用的数据库,避免测试过程破坏生产数据
         parent::$app->start();
     }
