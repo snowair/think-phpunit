@@ -26,7 +26,6 @@ class PhpunitHelper {
     public function __construct($app_path=null, $think_path=null, $runtime_path=null)
     {
         $const = $this->guessPath();
-        extract($const);
         if ($app_path===null) {
             $app_path = $const['APP_PATH'];
         }
