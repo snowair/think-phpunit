@@ -100,6 +100,7 @@ class PhpunitHelper {
                         $think_path = dirname(realpath($basepath.DS.$matches[1]));
                         $const['THINK_PATH'] = $think_path;
                     }
+                    $const['APP_PATH'] = realpath($rootPath.DIRECTORY_SEPARATOR.$const['APP_PATH']) ;
                 }
             }
             $const['ROOT_PATH'] = $rootPath;
@@ -353,6 +354,7 @@ class PhpunitHelper {
         \Think\Hook::listen('app_begin');
 
         $db_name = C('DB_NAME'); // 应用使用的数据库名
+        $db_host = C('DB_HOST'); // 应用使用的数据库名
 
         C('SHOW_PAGE_TRACE',false);
 
@@ -367,15 +369,20 @@ class PhpunitHelper {
         }
 
         $test_db_name = C('DB_NAME'); // 测试数据库的数据库名
-        if ($db_name==$test_db_name) {
-            C('DB_NAME','');
+        $test_db_host = C('DB_HOST'); // 应用使用的数据库名
+        if (
+            ($db_name && $db_name==$test_db_name)
+           && ($db_host && $db_host==$test_db_host)
+        ) {
+            throw new \Exception('请单独为测试环境设置数据库连接配置');
         }
 
 
         // 加载测试执行前setTestConfig方法临时设置的配置
         C($this->testConfig);
-
-        $this->model = new \Think\Model();
+        if ($test_db_name && $test_db_host && C('DB_TYPE') && C('DB_USER')) {
+            $this->model = new \Think\Model();
+        }
 
         // 记录应用初始化时间
         G('initTime');
@@ -426,6 +433,7 @@ class PhpunitHelper {
                 || !empty($_GET[C('VAR_AJAX_SUBMIT')])
             ) ? true : false
         );
+        C('phpunit',true);
         return ;
     }
 
@@ -547,7 +555,6 @@ class PhpunitHelper {
      */
     public function setTestConfig(array $config )
     {
-        $config['phpunit']=true;
         $this->testConfig = $config;
     }
 
