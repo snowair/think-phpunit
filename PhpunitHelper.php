@@ -43,9 +43,9 @@ class PhpunitHelper {
         }
 
         define ( 'APP_DEBUG', true );
-        define ( 'APP_PATH', $app_path );
-        define ( 'RUNTIME_PATH', $runtime_path );
-        define ( 'THINK_PATH',$think_path);
+        define ( 'APP_PATH', rtrim($app_path,'\\/').'/' );
+        define ( 'RUNTIME_PATH', rtrim($runtime_path,'\\/').'/' );
+        define ( 'THINK_PATH',rtrim($think_path,'\\/').'/');
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REMOTE_ADDR']='127.0.0.1';
         $_SERVER['REMOTE_PORT']='32800';
@@ -231,6 +231,7 @@ class PhpunitHelper {
     public function start()
     {
         spl_autoload_register('\\Think\\PhpunitHelper::autoload');
+        register_shutdown_function('\\Think\\PhpunitHelper::fatalError');
         Storage::connect(STORAGE_TYPE);
 
         $mode   =   include is_file(CONF_PATH.'core.php')?CONF_PATH.'core.php':MODE_PATH.APP_MODE.'.php';
@@ -390,6 +391,13 @@ class PhpunitHelper {
         define('MODULE_PATH', APP_PATH.MODULE_NAME.'/');
         // 定义当前模块的模版缓存路径
         C('CACHE_PATH',CACHE_PATH.MODULE_NAME.'/');
+        if (!file_exists(LOG_PATH)) {
+            mkdir(LOG_PATH,0755);
+        }
+        C('LOG_PATH',  realpath(LOG_PATH).'/'.MODULE_NAME.'/');
+
+        // 模块检测
+        Hook::listen('module_check');
 
         // 加载模块配置文件
         if(is_file(MODULE_PATH.'Conf/config.php')){
@@ -406,6 +414,8 @@ class PhpunitHelper {
         if(is_file(MODULE_PATH.'Common/function.php')){
             include MODULE_PATH.'Common/function.php';
         }
+        // 加载模块的扩展配置文件
+        load_ext_file(MODULE_PATH);
 
         $depr = C('URL_PATHINFO_DEPR');
         define('MODULE_PATHINFO_DEPR',  $depr);
@@ -456,6 +466,12 @@ class PhpunitHelper {
     {
         if (isset(self::$_map[$class])) {
             include self::$_map[$class];
+        }
+    }
+
+    static public function fatalError() {
+        if ($e = error_get_last()) {
+            print_r($e);
         }
     }
 
