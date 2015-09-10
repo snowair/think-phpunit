@@ -99,7 +99,9 @@ class PhpunitHelper {
                         $think_path = dirname(realpath($basepath.DS.$matches[1]));
                         $const['THINK_PATH'] = $think_path;
                     }
-                    $const['APP_PATH'] = realpath($rootPath.DIRECTORY_SEPARATOR.$const['APP_PATH']) ;
+                    if (!file_exists( $const['APP_PATH'] )) {
+                        $const['APP_PATH'] = realpath($rootPath.DIRECTORY_SEPARATOR.$const['APP_PATH']) ;
+                    }
                 }
             }
             $const['ROOT_PATH'] = $rootPath;
@@ -379,7 +381,7 @@ class PhpunitHelper {
 
         // 加载测试执行前setTestConfig方法临时设置的配置
         C($this->testConfig);
-        if ($test_db_name && $test_db_host && C('DB_TYPE') && C('DB_USER')) {
+        if ($test_db_name && $test_db_name && C('DB_TYPE') && C('DB_USER')) {
             $this->model = new \Think\Model();
         }
 
@@ -590,6 +592,8 @@ class PhpunitHelper {
         $dir = dirname($vendorParent);
         if ( file_exists($vendorParent. DS .'composer.json')
             || file_exists( $vendorParent.DS.'.git')
+            || file_exists( $vendorParent.DS.'.svn')
+            || file_exists( $vendorParent.DS.'.hg')
             || file_exists( $vendorParent.DS.'index.php' )
         )
         {
