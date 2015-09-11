@@ -369,6 +369,8 @@ class PhpunitHelper {
 
         }
 
+        // 加载测试执行前setTestConfig方法临时设置的配置
+        C($this->testConfig);
         $test_db_name = C('DB_NAME'); // 测试数据库的数据库名
         $test_db_host = C('DB_HOST'); // 应用使用的数据库名
         if (
@@ -379,8 +381,6 @@ class PhpunitHelper {
         }
 
 
-        // 加载测试执行前setTestConfig方法临时设置的配置
-        C($this->testConfig);
         if ($test_db_name && $test_db_name && C('DB_TYPE') && C('DB_USER')) {
             $this->model = new \Think\Model();
         }
