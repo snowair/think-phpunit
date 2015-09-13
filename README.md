@@ -2,9 +2,13 @@
 
 帮助ThinkPHP3.2项目实施phpunit单元测试.
 
+问题反馈与交流QQ群: 476050570
+
 # 使用
 
-think-phpunit 是一个composer包, 需要首先安装composer, 本文不做介绍.
+think-phpunit 是一个composer包, 需要首先安装composer.
+
+PHPUnit 及 Composer的使用本文不做介绍.
 
 ### 创建composer.json 并安装依赖
 
@@ -33,7 +37,7 @@ $ composer install
 think-phpunit的单元测试类遵循以下规则:
 
 1. 继承自 `Think\Phpunit` 类
-2. 每个类都要在 `setupBeforeClass` 方法中创建出模拟app实例.
+2. 每个类都要在 `setupBeforeClass` 静态方法中创建出模拟app实例.
 
 测试文件组织比较自由，只要能保证phpunit能在执行时载入它即可. 我把测试文件放在了项目根目录下的 test 文件夹
 
@@ -95,3 +99,28 @@ headers_sent() or header(''); // 推荐: 发送前判断是否已经产生过输
 由于exit 会中断一切执行, 所以 phpunit 无法测试使用了exit语句的方法 . 
  
 如果你的方法中直接或间接用到了exit, 最佳的办法就是重构去除exit, 让程序能正常终结, 而不要强制终结.
+
+# 执行测试 
+
+假设你创建了一个测试类 `./test/IndexControllerTest.php`,
+
+## 在命令行执行测试
+
+只需要进入你的项目目录, 然后执行
+
+```
+$ vendor/bin/phpunit test/IndexControllerTest.php 
+```
+
+## PHPStorm中执行测试
+
+PHPStrom是一个强大的IDE, 可以很方便地执行测试. 我简单介绍一下如何在PHPStorm中配置phpunit.
+
+1. 打开`File->Settings...` 对话框
+2. 进入`Languages & Frameworks -> PHP`对话框, 设置`Interpreter`
+2. 进入`Languages & Frameworks -> PHP -> PHPUnit`对话框.
+3. 因为我们一般都是本地执行测试, 因此只需要设置 Local. 设置 "PHPUnit Library" 项, 勾选选择"Use Custom autoloader", 然后在"Path to script:" 定位到项目的自动加载文件`vendor/autoload.php`.
+
+这样,就基本设置就完成了.
+
+接下来,  然后在PHPStorm的文件名或这个文件的编辑区域上右键单击, 选择**Run IndexControllerTest**. 测试就会执行, 并打开Run bar显示执行过程和结果.
