@@ -8,6 +8,8 @@
 
 think-phpunit 是一个composer包, 需要首先安装composer.
 
+[composer中文文档](http://www.kancloud.cn/thinkphp/composer)
+
 PHPUnit 及 Composer的使用本文不做介绍.
 
 ### 创建composer.json 并安装依赖
