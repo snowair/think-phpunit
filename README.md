@@ -84,6 +84,8 @@ class IndexControllerTest extends PhpUnit
 
 1. 不用使用 exit 语句, 因为他会终结一切, 包括测试.
 2. 不要直接使用 header 函数, 因为phpunit输出在先.
+3. 尽量不要使用常量, 因为常量的值无法改变, 这意味着如果两个测试方法如果需要不同的常量值, 你将无法办到.
+    * TP中以下常量往往会限制单元测试: `IS_POST`,`IS_AJAX`,`ACTION_NAME`,`__ACTION__` 等.
 
 ## 关于 header 函数
 

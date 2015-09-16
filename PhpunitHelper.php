@@ -8,6 +8,8 @@
  */
 namespace Think;
 
+use Snowair\Think\Phpunit\Response;
+
 class PhpunitHelper {
 
     protected static $_map=[];
@@ -33,7 +35,7 @@ class PhpunitHelper {
             $think_path = $const['THINK_PATH'];
         }
         if ($runtime_path===null) {
-            $runtime_path = $const['ROOT_PATH'].'/Runtiime-test';
+            $runtime_path = $const['ROOT_PATH'].'/Runtime-test';
         }
 
         if (!file_exists( $app_path )) {
@@ -181,7 +183,7 @@ class PhpunitHelper {
      */
     public function setGET( $get )
     {
-        $_GET = $get;
+        $_GET = array_merge($_GET,$get);
         $_REQUEST=array_merge($_REQUEST,$_GET);
     }
 
@@ -191,8 +193,22 @@ class PhpunitHelper {
      */
     public function setPOST( $post )
     {
-        $_POST = $post;
+        $_POST = array_merge($_POST,$post);
         $_REQUEST=array_merge($_REQUEST,$_POST);
+    }
+
+    /**
+     * 设置 $_POST变量
+     *
+     * @param $request
+     * @param $merge_post
+     */
+    public function setRequest( $request, $merge_post=true )
+    {
+        $this->setGET($request);
+        if ($merge_post) {
+            $this->setPOST( $request );
+        }
     }
 
     /**
@@ -387,13 +403,6 @@ class PhpunitHelper {
 
         // 记录应用初始化时间
         G('initTime');
-        $controller ="\\".MODULE_NAME."\\Controller\\".CONTROLLER_NAME.C("DEFAULT_C_LAYER");
-        if (class_exists( $controller )) {
-            try{
-                PhpUnit::setController( new $controller );
-            }catch(\Exception $e ){
-            }
-        }
     }
 
     protected function init()
@@ -407,10 +416,10 @@ class PhpunitHelper {
         // 定义当前请求的系统常量
         define('NOW_TIME',      $_SERVER['REQUEST_TIME']);
         define('REQUEST_METHOD',$_SERVER['REQUEST_METHOD']);
-        define('IS_GET',        REQUEST_METHOD =='GET' ? true : false);
-        define('IS_POST',       REQUEST_METHOD =='POST' ? true : false);
-        define('IS_PUT',        REQUEST_METHOD =='PUT' ? true : false);
-        define('IS_DELETE',     REQUEST_METHOD =='DELETE' ? true : false);
+        defined('IS_GET')    || define('IS_GET',        REQUEST_METHOD =='GET' ? true : false);
+        defined('IS_POST')   || define('IS_POST',       REQUEST_METHOD =='POST' ? true : false);
+        defined('IS_PUT')    || define('IS_PUT',        REQUEST_METHOD =='PUT' ? true : false);
+        defined('IS_DELETE') || define('IS_DELETE',     REQUEST_METHOD =='DELETE' ? true : false);
 
         // URL调度
         $this->dispatch();
@@ -489,24 +498,24 @@ class PhpunitHelper {
             $urlMode        =   C('URL_MODEL');
             if($urlMode == URL_COMPAT ){// 兼容模式判断
                 $varPath        =   C('VAR_PATHINFO');
-                define('PHP_FILE',_PHP_FILE_.'?'.$varPath.'=');
+                defined('PHP_FILE') ||define('PHP_FILE',_PHP_FILE_.'?'.$varPath.'=');
             }elseif($urlMode == URL_REWRITE ) {
                 $url    =   dirname(_PHP_FILE_);
                 if($url == '/' || $url == '\\')
                     $url    =   '';
-                define('PHP_FILE',$url);
+                defined('PHP_FILE') ||define('PHP_FILE',$url);
             }else {
-                define('PHP_FILE',_PHP_FILE_);
+                defined('PHP_FILE') ||define('PHP_FILE',_PHP_FILE_);
             }
             // 当前应用地址
-            define('__APP__',strip_tags(PHP_FILE));
+            defined('__APP__') ||define('__APP__',strip_tags(PHP_FILE));
         }
 
         $moduleName    =   MODULE_NAME;
         $controllerName =   CONTROLLER_NAME;
         define('__MODULE__',(defined('BIND_MODULE') || !C('MULTI_MODULE'))? __APP__ : __APP__.'/'.($urlCase ? strtolower($moduleName) : $moduleName));
         define('__CONTROLLER__',__MODULE__.$depr.(defined('BIND_CONTROLLER')? '': ( $urlCase ? parse_name($controllerName) : $controllerName )) );
-        define('__ACTION__',__CONTROLLER__.$depr.$this->action_name);
+        defined('__ACTION__') || define('__ACTION__',__CONTROLLER__.$depr.$this->action_name);
         defined('__SELF__') || define('__SELF__',strip_tags(isset($_SERVER[C('URL_REQUEST_URI')])?$_SERVER[C('URL_REQUEST_URI')]:''));
     }
 

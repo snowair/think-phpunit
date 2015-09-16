@@ -30,11 +30,12 @@ abstract class PhpUnit extends \PHPUnit_Framework_TestCase
      */
     public static function execAction($name,$params=array())
     {
-        if (method_exists(self::$controller,$name)) {
+        $controller = self::getController();
+        if (method_exists($controller,$name)) {
             self::$app->setActionName($name);
             try{
                 ob_start();
-                call_user_func_array(array(self::$controller,$name),$params);
+                call_user_func_array(array($controller,$name),$params);
                 return ob_get_clean();
             }catch (Response $e){
                 ob_end_clean();
@@ -44,6 +45,14 @@ abstract class PhpUnit extends \PHPUnit_Framework_TestCase
             throw new \Exception($name.'方法不存在');
         }
 
+    }
+
+    public static function getController()
+    {
+        $controller ="\\".MODULE_NAME."\\Controller\\".CONTROLLER_NAME.C("DEFAULT_C_LAYER");
+        if (class_exists( $controller )) {
+            return new $controller;
+        }
     }
 
 }
