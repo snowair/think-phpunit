@@ -8,7 +8,7 @@ namespace Think;
 
 use Snowair\Think\Phpunit\Response;
 
-abstract class PhpUnit extends \PHPUnit_Framework_TestCase
+trait PhpUnit
 {
 
     /** @var  PhpunitHelper */

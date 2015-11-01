@@ -1,5 +1,5 @@
 {
-  "name": "snowair/phpunithelper-thinkphp",
+  "name": "snowair/think-phpunit",
   "description": "ThinkPHP3.2单元测试辅助类",
   "authors": [
     {
@@ -15,6 +15,7 @@
     ]
   },
   "require": {
+    "php":">=5.4",
     "phpunit/phpunit": "^4.7"
   }
 }

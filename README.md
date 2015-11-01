@@ -6,7 +6,13 @@
 
 # 使用
 
-think-phpunit 是一个composer包, 需要首先安装composer.
+使用think-phpunit的最重要的前提是你本身懂得什么是单元测试. 如果你还对单元测试一知半解，请先认真学习phpunit.
+
+此外, think-phpunit 是一个composer包, 需要首先安装composer.
+
+记住: 先学会走路, 再学跑步.
+
+[phpunit中文文档](https://phpunit.de/manual/current/zh_cn/index.html)
 
 [composer中文文档](http://www.kancloud.cn/thinkphp/composer)
 
@@ -26,10 +32,24 @@ PHPUnit 及 Composer的使用本文不做介绍.
 }
 ```
 
-**关键在于： autoload和require-dev**, 你必须让composer能在测试时找到你的类.
+**关键在于：autoload和require-dev**, 你必须让composer能在测试时找到你的类. 所有需要在autoload中进行注册
+
+首次安装:
 
 ```
 $ composer install
+```
+
+更新:
+
+```
+$ composer update
+```
+
+当你向项目中增加了新的class以后，需要重建autoload:
+
+```
+$ composer dump-autoload
 ```
 
 安装好以后, 你就可以为项目中任何一个类创建单元测试类了:
@@ -38,14 +58,15 @@ $ composer install
 
 think-phpunit的单元测试类遵循以下规则:
 
-1. 继承自 `Think\Phpunit` 类
-2. 每个类都要在 `setupBeforeClass` 静态方法中创建出模拟app实例.
+1. 所有的测试类都要在 `setupBeforeClass` 静态方法中创建出模拟app实例.
+
+2. 如果测试的是控制器类，那么测试类要 `use \Think\Phpunit;`. 测试其他类不需要这条
 
 测试文件组织比较自由，只要能保证phpunit能在执行时载入它即可. 我把测试文件放在了项目根目录下的 test 文件夹
 
-对于TP项目而言, 最困难的地方在于控制器测试, think-phpunit 将一切简化到一行:
+对于TP项目而言, 最困难的地方在于控制器类的测试, think-phpunit 将一切简化到一行:
 
-1. 使用控制器测试类的 `execAction($action_name)` 执行控制器action, 它会返回action执行产生的所有输出供你做断言.
+使用控制器测试类的 `execAction($action_name)` 执行控制器action, 它会返回action执行产生的所有输出供你做断言.
 
 下面是一个简单的测试控制器方法输出的示例测试文件,其他类型的类就不做介绍了:
 
@@ -53,18 +74,17 @@ think-phpunit的单元测试类遵循以下规则:
 <?php
 namespace Home\Controller;
 
-use Think\PhpUnit;
-
-class IndexControllerTest extends PhpUnit
+class IndexControllerTest extends \PHPUnit_Framework_TestCase
 {
+    use \Think\PhpUnit; // 只有控制器测试类才需要它
 
     static public function setupBeforeClass()
     {
         // 下面四行代码模拟出一个应用实例, 每一行都很关键, 需正确设置参数
-        parent::$app = new \Think\PhpunitHelper();
-        parent::$app->setMVC('domain.com','Home','Index');
-        parent::$app->setTestConfig(['DB_NAME'=>'test', 'DB_HOST'=>'127.0.0.1',]); // 一定要设置一个测试用的数据库,避免测试过程破坏生产数据
-        parent::$app->start();
+        self::$app = new \Think\PhpunitHelper();
+        self::$app->setMVC('domain.com','Home','Index');
+        self::$app->setTestConfig(['DB_NAME'=>'test', 'DB_HOST'=>'127.0.0.1',]); // 一定要设置一个测试用的数据库,避免测试过程破坏生产数据
+        self::$app->start();
     }
 
     /**
@@ -74,6 +94,34 @@ class IndexControllerTest extends PhpUnit
     {
         $output = $this->execAction('index');
         $this->assertEquals('hello world',$output);
+    }
+}
+```
+
+```
+<?php
+namespace Home\Model;
+
+class UserModelTest extends \PHPUnit_Framework_TestCase
+{
+
+    static public function setupBeforeClass()
+    {
+        // 下面四行代码模拟出一个应用实例, 每一行都很关键, 需正确设置参数
+        self::$app = new \Think\PhpunitHelper();
+        self::$app->setMVC('domain.com','Home','Index');
+        self::$app->setTestConfig(['DB_NAME'=>'test', 'DB_HOST'=>'127.0.0.1',]); // 一定要设置一个测试用的数据库,避免测试过程破坏生产数据
+        self::$app->start();
+    }
+
+    /**
+     * 模型类方法测试示例
+     */
+    public function testGetUsername()
+    {
+        $Model = new UserModel();
+        $user_name  = $Model->getUsername(1);
+        $this->assertEquals('admin',$output);
     }
 }
 ```
