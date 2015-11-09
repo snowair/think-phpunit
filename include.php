@@ -13,4 +13,5 @@ if (php_sapi_name()=='cli') {
     include_once __DIR__.DIRECTORY_SEPARATOR.'Think'.DIRECTORY_SEPARATOR.'Controller.php';
     include_once __DIR__.DIRECTORY_SEPARATOR.'Think'.DIRECTORY_SEPARATOR.'View.class.php';
     include_once __DIR__.DIRECTORY_SEPARATOR.'Think'.DIRECTORY_SEPARATOR.'PhpUnit.php';
+    include_once __DIR__.DIRECTORY_SEPARATOR.'Think'.DIRECTORY_SEPARATOR.'DatabaseTransaction.php';
 }
