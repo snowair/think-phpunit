@@ -158,10 +158,17 @@ headers_sent() or header(''); // 推荐: 发送前判断是否已经产生过输
 
 ## 在命令行执行测试
 
-只需要进入你的项目目录, 然后执行
+只需要**cd**进入你的项目目录, 然后执行
 
 ```
-$ vendor/bin/phpunit test/IndexControllerTest.php 
+vendor/bin/phpunit  path-to-your-test-class-file 
+```
+
+例如:
+
+```
+~ $ cd project
+~/project $ vendor/bin/phpunit ./test/IndexControllerTest.php 
 ```
 
 ## PHPStorm中执行测试
