@@ -121,7 +121,7 @@ class UserModelTest extends \PHPUnit_Framework_TestCase
     {
         $Model = new UserModel();
         $user_name  = $Model->getUsername(1);
-        $this->assertEquals('admin',$output);
+        $this->assertEquals('admin',$user_name);
     }
 }
 ```
