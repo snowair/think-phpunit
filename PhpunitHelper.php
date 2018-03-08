@@ -458,6 +458,7 @@ class PhpunitHelper {
     {
         View::$action_name = $action;
         $this->action_name = $action;
+        defined('ACTION_NAME')     or define('ACTION_NAME', $action); 
     }
 
     protected function dispatch()
